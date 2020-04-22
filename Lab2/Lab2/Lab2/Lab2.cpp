@@ -1,4 +1,4 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <string>
@@ -7,8 +7,8 @@ using namespace std;
 
 struct block
 {
-	int wholeBlock; //целый блок
-	int incompleteBlock; //неполный блок
+	int wholeBlock; //С†РµР»С‹Р№ Р±Р»РѕРє
+	int incompleteBlock; //РЅРµРїРѕР»РЅС‹Р№ Р±Р»РѕРє
 };
 
 int GetTheNumber(char inputData[], const int SIZE);
@@ -21,45 +21,37 @@ void DeleteFileContents(string directory);
 void WriteToFile(block& inputData);
 void ReadToFile(block& inputData);
 
-int main()
+int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "rus");
 
-	cout << "[-e] [-d] [диск1:][путь1]имя_файла1 [диск2:][путь2]имя_файла2\n"
-		<< "[имя_файла1] [имя_файла2] состоит из латинских символов\n"
-		<< "\n  -e    Зашифровать имя_файла1 имя_файла2"
-		<< "\n  -d    Расшифровать имя_файла1 имя_файла2\n\n";
-
-	cout << "Введите \"exit\" - для завершении работы программы\n\n";
-
-	const int N = 32;
-	const int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
-	char arrBuffer[N / 8];
-
-	string teamName;
-
-	do
+	for (int i = 0; i < argc; i++)
 	{
-		cin >> teamName;
-
-		if (teamName.length() == 2)
+		if (!strcmp(argv[i], "/?"))
 		{
-			if (teamName == "-e")
+			cout << "[-e] [-d] [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n"
+				<< "\n  -e    Р—Р°С€РёС„СЂРѕРІР°С‚СЊ РёРјСЏ_С„Р°Р№Р»Р°1 РёРјСЏ_С„Р°Р№Р»Р°2"
+				<< "\n  -d    Р Р°СЃС€РёС„СЂРѕРІР°С‚СЊ РёРјСЏ_С„Р°Р№Р»Р°1 РёРјСЏ_С„Р°Р№Р»Р°2\n\n";
+		}
+		else if (!strcmp(argv[i], "-e"))
+		{
+			if (argv[i + 1] != NULL && argv[i + 2] != NULL)
 			{
-				string fileName1, fileName2;
-				cin >> fileName1 >> fileName2;
+				const int N = 32;
+				const int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
+				char arrBuffer[N / 8];
 
-				/* Шифрование */
+				/* РЁРёС„СЂРѕРІР°РЅРёРµ */
 				block b{};
 				ifstream finE;
-				finE.open(fileName1, ios_base::binary);
+				finE.open(argv[i + 1], ios_base::binary);
 
 				if (!finE.is_open())
 				{
-					EXIT_FAILURE;
+					exit(EXIT_FAILURE);
 				}
 
-				DeleteFileContents(fileName2);
+				DeleteFileContents(argv[i + 2]);
 
 				do
 				{
@@ -73,32 +65,39 @@ int main()
 						}
 
 						TextEncryption(arrBuffer, (N / 8), arrKey, GetTheNumber(arrBuffer, (N / 8)));
-						WriteToFile(arrBuffer, (N / 8), fileName2);
+						WriteToFile(arrBuffer, (N / 8), argv[i + 2]);
 
 						((int)finE.gcount() < (N / 8)) ? b.incompleteBlock = (int)finE.gcount() : b.wholeBlock++;
 					}
 
 				} while (!finE.eof());
 
-				finE.close();				
+				finE.close();
 				WriteToFile(b);
-				cout << "Операция завершилась успехом\n";
 			}
-			else if (teamName == "-d")
+			else
 			{
-				string fileName1, fileName2;
-				cin >> fileName1 >> fileName2;
+				cout << "\n-e [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n";
+			}			
+		}
+		else if (!strcmp(argv[i], "-d"))
+		{
+			if (argv[i + 1] != NULL && argv[i + 2] != NULL)
+			{
+				const int N = 32;
+				const int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
+				char arrBuffer[N / 8];
 
-				/* Расшифровывание */
+				/* Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РЅРёРµ */
 				ifstream finD;
-				finD.open(fileName1, ios_base::binary);
+				finD.open(argv[i + 1], ios_base::binary);
 
 				if (!finD.is_open())
 				{
-					EXIT_FAILURE;
+					exit(EXIT_FAILURE);
 				}
 
-				DeleteFileContents(fileName2);
+				DeleteFileContents(argv[i + 2]);
 				block b{};
 				ReadToFile(b);
 
@@ -109,7 +108,7 @@ int main()
 					if (b.wholeBlock--)
 					{
 						TextDecryption(arrBuffer, (N / 8), arrKey, N, GetTheNumber(arrBuffer, (N / 8)));
-						WriteToFile(arrBuffer, (N / 8), fileName2);
+						WriteToFile(arrBuffer, (N / 8), argv[i + 2]);
 
 						if (!b.wholeBlock && b.incompleteBlock)
 						{
@@ -123,7 +122,7 @@ int main()
 								*(arrDecryption + i) = arrBuffer[i];
 							}
 
-							WriteToFile(arrDecryption, b.incompleteBlock, fileName2);
+							WriteToFile(arrDecryption, b.incompleteBlock, argv[i + 2]);
 							break;
 						}
 					}
@@ -131,24 +130,18 @@ int main()
 				} while (!finD.eof());
 
 				finD.close();
-				cout << "Операция завершилась успехом\n";
 			}
 			else
 			{
-				cout << "Ошибка ввода команды...\n";
+				cout << "\n-d [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n";
 			}
 		}
-		else if (teamName != "exit")
-		{
-			cout << "Ошибка ввода команды...\n";
-		}
-
-	} while (teamName != "exit");
+	}
 
 	return 0;
 }
 
-/* Получить целое число */
+/* РџРѕР»СѓС‡РёС‚СЊ С†РµР»РѕРµ С‡РёСЃР»Рѕ */
 int GetTheNumber(char inputData[], const int SIZE)
 {
 	int number = 0;
@@ -163,7 +156,7 @@ int GetTheNumber(char inputData[], const int SIZE)
 
 	return number;
 }
-/* Шифрование + запись в буфер */
+/* РЁРёС„СЂРѕРІР°РЅРёРµ + Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ */
 void TextEncryption(char inputBuffer[], const int SIZE, const int arrKey[], int number)
 {
 	for (int i = 0; i < SIZE; i++)
@@ -179,7 +172,7 @@ void TextEncryption(char inputBuffer[], const int SIZE, const int arrKey[], int 
 		inputBuffer[i] += (int)(bool)((1 << arrKey[8 * i + 7]) & number);
 	}
 }
-/* Расшифрование + запись в буфер */
+/* Р Р°СЃС€РёС„СЂРѕРІР°РЅРёРµ + Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ */
 void TextDecryption(char inputBuffer[], const int sizeBuffer, const int arrKey[], const int sizeKey, int number)
 {
 	for (int index, i = 0; i < sizeBuffer; i++)
@@ -202,7 +195,7 @@ void TextDecryption(char inputBuffer[], const int sizeBuffer, const int arrKey[]
 	}
 }
 
-/* Запись в файл */
+/* Р—Р°РїРёСЃСЊ РІ С„Р°Р№Р» */
 void WriteToFile(const char inputData[], const int SIZE, string directory)
 {
 	ofstream fout;
@@ -210,13 +203,13 @@ void WriteToFile(const char inputData[], const int SIZE, string directory)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fout.write(inputData, SIZE);
 	fout.close();
 }
-/* Очистить файл */
+/* РЈРґР°Р»РёС‚СЊ СЃРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р° */
 void DeleteFileContents(string directory)
 {
 	ofstream fout;
@@ -224,13 +217,13 @@ void DeleteFileContents(string directory)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fout.close();
 }
 
-/* Запись блока в файл */
+/* Р—Р°РїРёСЃСЊ Р±Р»РѕРєР° РІ С„Р°Р№Р» */
 void WriteToFile(block& inputData)
 {
 	ofstream fout;
@@ -238,13 +231,13 @@ void WriteToFile(block& inputData)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fout << inputData.wholeBlock << " " << inputData.incompleteBlock;
 	fout.close();
 }
-/* Чтение блока из файл */
+/* Р§С‚РµРЅРёРµ Р±Р»РѕРєР° РёР· С„Р°Р№Р» */
 void ReadToFile(block& inputData)
 {
 	ifstream fin;
@@ -252,7 +245,7 @@ void ReadToFile(block& inputData)
 
 	if (!fin.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fin >> inputData.wholeBlock >> inputData.incompleteBlock;

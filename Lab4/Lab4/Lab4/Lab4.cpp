@@ -1,4 +1,4 @@
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+п»ї#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <iostream>
 #include <fstream>
 #include <experimental/filesystem>
@@ -18,10 +18,10 @@ struct SupportingInfo
 
 struct BitMapHeader
 {
-	int size;		// Размер файла
-	int offsetBits; // Смещение изображения от начала файла
-	short bitCount; // Глубина цвета
-	int sizeImage;  // Размер изображения (байт)
+	int size;		// Р Р°Р·РјРµСЂ С„Р°Р№Р»Р°
+	int offsetBits; // РЎРјРµС‰РµРЅРёРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РѕС‚ РЅР°С‡Р°Р»Р° С„Р°Р№Р»Р°
+	short bitCount; // Р“Р»СѓР±РёРЅР° С†РІРµС‚Р°
+	int sizeImage;  // Р Р°Р·РјРµСЂ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ (Р±Р°Р№С‚)
 };
 
 short getTypeValueShort(const char arr[]);
@@ -48,16 +48,17 @@ int main(int argc, char* argv[])
 	{
 		if (!strcmp(argv[i], "/?"))
 		{
-			cout << "\n[-embed] [-retrieve] [диск1:][путь1]имя_файла1 [диск2:][путь2]имя_файла2\n[-check] [диск1:][путь1]имя_файла1\n"
-				<< "\n  -embed      Помещает \"секретный\" контент имя_файла1 в имя_файла2.bmp"
-				<< "\n  -retrieve   Извлекает \"секретный\" контент из имя_файла1.bmp и помещает его в имя_файла2"
-				<< "\n  -check      Проверяет наличие \"секретного\" содержимого в имя_файла1.bmp\n";
+			cout << "\n[-embed] [-retrieve] [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n[-check] [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1\n"
+				<< "\n  -embed      РџРѕРјРµС‰Р°РµС‚ \"СЃРµРєСЂРµС‚РЅС‹Р№\" РєРѕРЅС‚РµРЅС‚ РёРјСЏ_С„Р°Р№Р»Р°1 РІ РёРјСЏ_С„Р°Р№Р»Р°2.bmp"
+				<< "\n  -retrieve   РР·РІР»РµРєР°РµС‚ \"СЃРµРєСЂРµС‚РЅС‹Р№\" РєРѕРЅС‚РµРЅС‚ РёР· РёРјСЏ_С„Р°Р№Р»Р°1.bmp Рё РїРѕРјРµС‰Р°РµС‚ РµРіРѕ РІ РёРјСЏ_С„Р°Р№Р»Р°2"
+				<< "\n  -check      РџСЂРѕРІРµСЂСЏРµС‚ РЅР°Р»РёС‡РёРµ \"СЃРµРєСЂРµС‚РЅРѕРіРѕ\" СЃРѕРґРµСЂР¶РёРјРѕРіРѕ РІ РёРјСЏ_С„Р°Р№Р»Р°1.bmp\n";
 		}
 		else if (!strcmp(argv[i], "-embed"))
 		{
 			if ((argv[i + 1] != NULL && argv[i + 2] != NULL) && strstr(argv[i + 2], ".bmp"))
 			{
 				BitMapHeader bmh;
+				const char* temporaryFile = "steganography.bmp";
 
 				if (isBitMapFile(argv[i + 2], bmh) && (bmh.bitCount == 24) && ((bmh.sizeImage / 4) >= (getfileSize(argv[i + 1]) + 2)))
 				{
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
 
 					if (!finTXT.is_open())
 					{
-						EXIT_FAILURE;
+						exit(EXIT_FAILURE);
 					}
 
 					ifstream finBMP;
@@ -74,15 +75,15 @@ int main(int argc, char* argv[])
 
 					if (!finBMP.is_open())
 					{
-						EXIT_FAILURE;
+						exit(EXIT_FAILURE);
 					}
 
 					//////////////////////////////////////////////////////////////////////////////////////////
 
 					char* arrBMH = new char[bmh.offsetBits];
 					finBMP.read(arrBMH, bmh.offsetBits);
-					DeleteFileContents("steganography.bmp");
-					WriteToFile(arrBMH, bmh.offsetBits, "steganography.bmp");
+					DeleteFileContents(temporaryFile);
+					WriteToFile(arrBMH, bmh.offsetBits, temporaryFile);
 					delete[] arrBMH;
 
 					SupportingInfo si;
@@ -92,8 +93,8 @@ int main(int argc, char* argv[])
 					char symbolBuffer;
 
 					finBMP.read(arrBuffer, N);
-					steganographyLSB(arrBuffer, N, characterEncryption(si.SEText, si.arrKey)); // Записать квадрад (начало текста)
-					WriteToFile(arrBuffer, N, "steganography.bmp");
+					steganographyLSB(arrBuffer, N, characterEncryption(si.SEText, si.arrKey)); // Р—Р°РїРёСЃР°С‚СЊ РєРІР°РґСЂР°Рґ (РЅР°С‡Р°Р»Рѕ С‚РµРєСЃС‚Р°)
+					WriteToFile(arrBuffer, N, temporaryFile);
 
 					do
 					{
@@ -106,11 +107,11 @@ int main(int argc, char* argv[])
 						}
 						else if (si.isEndText)
 						{
-							steganographyLSB(arrBuffer, N, characterEncryption(si.SEText, si.arrKey)); // Записать квадрад (конец текста)
+							steganographyLSB(arrBuffer, N, characterEncryption(si.SEText, si.arrKey)); // Р—Р°РїРёСЃР°С‚СЊ РєРІР°РґСЂР°Рґ (РєРѕРЅРµС† С‚РµРєСЃС‚Р°)
 							si.isEndText = false;
 						}
 
-						WriteToFile(arrBuffer, N, "steganography.bmp");
+						WriteToFile(arrBuffer, N, temporaryFile);
 
 					} while (!finBMP.eof());
 
@@ -120,11 +121,11 @@ int main(int argc, char* argv[])
 					finTXT.close();
 
 					ifstream finStegBMP;
-					finStegBMP.open("steganography.bmp", ios_base::binary);
+					finStegBMP.open(temporaryFile, ios_base::binary);
 
 					if (!finStegBMP.is_open())
 					{
-						EXIT_FAILURE;
+						exit(EXIT_FAILURE);
 					}
 
 					//////////////////////////////////////////////////////////////////////////////////////////
@@ -153,12 +154,12 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					cout << "\nПроизошла ошибка при выполнении операции...\n";
+					cout << "\nРџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РѕРїРµСЂР°С†РёРё...\n";
 				}
 			}
 			else
 			{
-				cout << "\n-embed [диск1:][путь1]имя_файла1 [диск2:][путь2]имя_файла2\n";
+				cout << "\n-embed [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n";
 			}
 		}
 		else if (!strcmp(argv[i], "-retrieve"))
@@ -174,7 +175,7 @@ int main(int argc, char* argv[])
 
 					if (!finBMP.is_open())
 					{
-						EXIT_FAILURE;
+						exit(EXIT_FAILURE);
 					}
 
 					//////////////////////////////////////////////////////////////////////////////////////////
@@ -215,12 +216,12 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					cout << "\nПроизошла ошибка при выполнении операции...\n";
+					cout << "\nРџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РѕРїРµСЂР°С†РёРё...\n";
 				}
 			}
 			else
 			{
-				cout << "\n-retrieve [диск1:][путь1]имя_файла1 [диск2:][путь2]имя_файла2\n";
+				cout << "\n-retrieve [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1 [РґРёСЃРє2:][РїСѓС‚СЊ2]РёРјСЏ_С„Р°Р№Р»Р°2\n";
 			}
 		}
 		else if (!strcmp(argv[i], "-check"))
@@ -238,9 +239,9 @@ int main(int argc, char* argv[])
 						fileSizeBMP = (int)fs::file_size(argv[i + 1]);
 
 						if (bmh.size != fileSizeBMP)
-							cout << "\nВ файле присутствует наличие \"скрытого\" содержимого\n";
+							cout << "\nР’ С„Р°Р№Р»Рµ РїСЂРёСЃСѓС‚СЃС‚РІСѓРµС‚ РЅР°Р»РёС‡РёРµ \"СЃРєСЂС‹С‚РѕРіРѕ\" СЃРѕРґРµСЂР¶РёРјРѕРіРѕ\n";
 						else
-							cout << "\nВ файле отсутствует наличие \"скрытого\" содержимого\n";
+							cout << "\nР’ С„Р°Р№Р»Рµ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РЅР°Р»РёС‡РёРµ \"СЃРєСЂС‹С‚РѕРіРѕ\" СЃРѕРґРµСЂР¶РёРјРѕРіРѕ\n";
 					}
 					catch (fs::filesystem_error& ex) {
 						cout << ex.what() << '\n';
@@ -248,12 +249,12 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					cout << "\nПроизошла ошибка при выполнении операции...\n";
+					cout << "\nРџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РѕРїРµСЂР°С†РёРё...\n";
 				}
 			}
 			else
 			{
-				cout << "\n-check [диск1:][путь1]имя_файла1\n";
+				cout << "\n-check [РґРёСЃРє1:][РїСѓС‚СЊ1]РёРјСЏ_С„Р°Р№Р»Р°1\n";
 			}
 		}
 	}
@@ -262,7 +263,7 @@ int main(int argc, char* argv[])
 }
 
 
-/* Получить значение типа short */
+/* РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ С‚РёРїР° short */
 short getTypeValueShort(const char arr[])
 {
 	int value = 0;
@@ -278,7 +279,7 @@ short getTypeValueShort(const char arr[])
 
 	return value += (unsigned char)arr[0];
 }
-/* Получить значение типа int */
+/* РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ С‚РёРїР° int */
 int getTypeValueInteger(const char arr[])
 {
 	int value = 0;
@@ -294,7 +295,7 @@ int getTypeValueInteger(const char arr[])
 
 	return value |= (unsigned char)arr[0];
 }
-/* Получить символ из массива BMP файла */
+/* РџРѕР»СѓС‡РёС‚СЊ СЃРёРјРІРѕР» РёР· РјР°СЃСЃРёРІР° BMP С„Р°Р№Р»Р° */
 char getCharacter(const char arr[], const int SIZE)
 {
 	char symbol = NULL;
@@ -311,7 +312,7 @@ char getCharacter(const char arr[], const int SIZE)
 	return symbol;
 }
 
-/* Это BMP файл */
+/* Р­С‚Рѕ BMP С„Р°Р№Р» */
 bool isBitMapFile(string directory, BitMapHeader& bmh)
 {
 	ifstream fin;
@@ -319,7 +320,7 @@ bool isBitMapFile(string directory, BitMapHeader& bmh)
 
 	if (!fin.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fin.seekg(0, fin.end);
@@ -378,7 +379,7 @@ bool isBitMapFile(string directory, BitMapHeader& bmh)
 
 	return ((arrType[0] == 'B' && arrType[1] == 'M') && (fileSizeBMP == fileLengthBMP));
 }
-/* Получить размер TXT файла */
+/* РџРѕР»СѓС‡РёС‚СЊ СЂР°Р·РјРµСЂ TXT С„Р°Р№Р»Р° */
 int getfileSize(string directory)
 {
 	ifstream fin;
@@ -386,7 +387,7 @@ int getfileSize(string directory)
 
 	if (!fin.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fin.seekg(0, fin.end);
@@ -396,7 +397,7 @@ int getfileSize(string directory)
 	return fileLengthTXT;
 }
 
-/* Записать в файл строку */
+/* Р—Р°РїРёСЃР°С‚СЊ РІ С„Р°Р№Р» СЃС‚СЂРѕРєСѓ */
 void WriteToFile(const char inputData[], const int SIZE, string directory)
 {
 	ofstream fout;
@@ -404,13 +405,13 @@ void WriteToFile(const char inputData[], const int SIZE, string directory)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);		
 	}
 
 	fout.write(inputData, SIZE);
 	fout.close();
 }
-/* Записать в файл символа */
+/* Р—Р°РїРёСЃР°С‚СЊ РІ С„Р°Р№Р» СЃРёРјРІРѕР»Р° */
 void WriteToFile(char symbol, string directory)
 {
 	ofstream fout;
@@ -418,13 +419,13 @@ void WriteToFile(char symbol, string directory)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fout << symbol;
 	fout.close();
 }
-/* Очистить содержимое файла */
+/* РћС‡РёСЃС‚РёС‚СЊ СЃРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р° */
 void DeleteFileContents(string directory)
 {
 	ofstream fout;
@@ -432,13 +433,13 @@ void DeleteFileContents(string directory)
 
 	if (!fout.is_open())
 	{
-		EXIT_FAILURE;
+		exit(EXIT_FAILURE);
 	}
 
 	fout.close();
 }
 
-/* Алгоритм шифрования */
+/* РђР»РіРѕСЂРёС‚Рј С€РёС„СЂРѕРІР°РЅРёСЏ */
 void steganographyLSB(char inputData[], const int SIZE, char symbol)
 {
 	int index = 7;
@@ -454,7 +455,7 @@ void steganographyLSB(char inputData[], const int SIZE, char symbol)
 	}
 }
 
-/* Зашифровать символ */
+/* Р—Р°С€РёС„СЂРѕРІР°С‚СЊ СЃРёРјРІРѕР» */
 char characterEncryption(char symbol, const int key[])
 {
 	char symbolEncryption = NULL;
@@ -468,7 +469,7 @@ char characterEncryption(char symbol, const int key[])
 
 	return symbolEncryption;
 }
-/* Расшифровать символ */
+/* Р Р°СЃС€РёС„СЂРѕРІР°С‚СЊ СЃРёРјРІРѕР» */
 char characterDecryption(char symbol, const int key[])
 {
 	char symbolDecryption = NULL;

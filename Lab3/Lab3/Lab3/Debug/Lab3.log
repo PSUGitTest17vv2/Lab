@@ -1,4 +1,0 @@
-﻿  Lab3.cpp
-D:\Проекты V.S.C 2017\SMLab\Lab3\Lab3\Lab3.cpp(85,81): warning C4805: |=: небезопасное смешение типа "short" и типа "bool" в операции
-D:\Проекты V.S.C 2017\SMLab\Lab3\Lab3\Lab3.cpp(89,86): warning C4805: |=: небезопасное смешение типа "short" и типа "bool" в операции
-  Lab3.vcxproj -> D:\Проекты V.S.C 2017\SMLab\Lab3\Debug\Lab3.exe

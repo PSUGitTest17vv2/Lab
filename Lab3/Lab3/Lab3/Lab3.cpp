@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <iomanip>
 #include <ctime>
 
@@ -9,7 +9,7 @@ char getRandomNumber(short numberRandom);
 int main()
 {
 	setlocale(LC_ALL, "rus");
-	cout << "Ââåäèòå êîëè÷åñòâî ÷èñåë äëÿ ãåíåðàöèè: ";
+	cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ñ‡Ð¸ÑÐµÐ» Ð´Ð»Ñ Ð³ÐµÐ½ÐµÑ€Ð°Ñ†Ð¸Ð¸: ";
 
 	short  numbersAmount;
 	cin >> numbersAmount;
@@ -21,7 +21,7 @@ int main()
 	float max = 0;
 	char* arr = new char[numbersAmount];
 
-	cout << "\nÑãåíåðèðîâàííûå ÷èñëà: ";
+	cout << "\nÐ¡Ð³ÐµÐ½ÐµÑ€Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ðµ Ñ‡Ð¸ÑÐ»Ð°: ";
 
 	for (int i = 0; i < numbersAmount; i++)
 	{
@@ -46,7 +46,7 @@ int main()
 		}
 	}
 
-	cout << "\n\nÎöåíêà ðàñïðåäåëåíèÿ ãåíåðèðóåìûõ ÷èñåë\n\n";
+	cout << "\n\nÐžÑ†ÐµÐ½ÐºÐ° Ñ€Ð°ÑÐ¿Ñ€ÐµÐ´ÐµÐ»ÐµÐ½Ð¸Ñ Ð³ÐµÐ½ÐµÑ€Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ñ… Ñ‡Ð¸ÑÐµÐ»\n\n";
 
 	float step = (max - min) / 10.0f;
 
@@ -74,10 +74,10 @@ int main()
 	return 0;
 }
 
-/* Ïîëó÷èòü ñëó÷àéíîå çíà÷åíèå */
+/* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ ÑÐ»ÑƒÑ‡Ð°Ð¹Ð½Ð¾Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ */
 char getRandomNumber(short numberRandom)
 {
-	const int N = sizeof(short) * 8 / 4; //ñäâèã íà 1/4 ÿ÷åéêè
+	const int N = sizeof(short) * 8 / 4; //ÑÐ´Ð²Ð¸Ð³ Ð½Ð° 1/4 ÑÑ‡ÐµÐ¹ÐºÐ¸
 	short numberLeftShift = 0;
 
 	for (int i = 0; i < N - 1; i++)

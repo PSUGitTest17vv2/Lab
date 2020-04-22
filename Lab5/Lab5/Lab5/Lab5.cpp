@@ -1,4 +1,4 @@
-#pragma comment(lib, "Pathcch.lib")
+п»ї#pragma comment(lib, "Pathcch.lib")
 
 #include <iostream>
 #include <Windows.h>
@@ -31,11 +31,11 @@ int main()
 
 		if (!AllocateAndInitializeSid(&authorityEverything, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pEverythingSID))
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
-		/* Все */
+		/* Р’СЃРµ */
 		ea[0].grfAccessPermissions = FILE_GENERIC_READ | FILE_GENERIC_EXECUTE;
 		ea[0].grfAccessMode = DENY_ACCESS;
 		ea[0].grfInheritance = NO_INHERITANCE;
@@ -45,11 +45,11 @@ int main()
 
 		if (!AllocateAndInitializeSid(&authorityAdministrator, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &pAdministratorSID))
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
-		/* Администратор */
+		/* РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ */
 		ea[1].grfAccessPermissions = FILE_GENERIC_READ | FILE_GENERIC_EXECUTE | FILE_GENERIC_WRITE | DELETE;
 		ea[1].grfAccessMode = SET_ACCESS;
 		ea[1].grfInheritance = NO_INHERITANCE;
@@ -61,7 +61,7 @@ int main()
 
 		if (ERROR_SUCCESS != res)
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
@@ -69,19 +69,19 @@ int main()
 
 		if (NULL == pSD)
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
 		if (!InitializeSecurityDescriptor(pSD, SECURITY_DESCRIPTOR_REVISION))
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
 		if (!SetSecurityDescriptorDacl(pSD, TRUE, pACL, FALSE))
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 			goto Cleanup;
 		}
 
@@ -96,7 +96,7 @@ int main()
 
 		if (INVALID_HANDLE_VALUE == cf)
 		{
-			MessageBox(NULL, TEXT("Возникла ошибка при созданиии файла :\nвозможно файл с таким именем уже был создан."), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРёРё С„Р°Р№Р»Р° :\nРІРѕР·РјРѕР¶РЅРѕ С„Р°Р№Р» СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ Р±С‹Р» СЃРѕР·РґР°РЅ."), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
 		}
 
 	Cleanup:

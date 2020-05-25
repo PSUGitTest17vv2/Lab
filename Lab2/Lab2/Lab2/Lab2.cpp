@@ -1,25 +1,34 @@
 ﻿#include <iostream>
 #include <fstream>
+#include <thread>
+#include <chrono>
 #include <cstdlib>
 #include <string>
 
 using namespace std;
 
+const unsigned BufferSize = 32768U;
+typedef char(*arraypointer)[BufferSize];
+
 struct block
 {
-	int wholeBlock; //целый блок
-	int incompleteBlock; //неполный блок
+	long long wholeBlock; //целый блок
+	long long incompleteBlock; //неполный блок
 };
 
-int GetTheNumber(char inputData[], const int SIZE);
-void TextEncryption(char inputBuffer[], const int SIZE, const int arrKey[], int number);
-void TextDecryption(char inputBuffer[], const int sizeBuffer, const int arrKey[], const int sizeKey, int number);
+void TextEncryption(char* arrBegin, char* arrEnd, int arrKey[], const unsigned keyLength);
+void TextDecryption(char* arrBegin, char* arrEnd, int arrKey[], const unsigned keyLength);
 
-void WriteToFile(const char inputData[], const int SIZE, string directory);
+unsigned GetNumber(char* arrBegin, char* arrEnd);
+void SwapAddress(arraypointer* a, arraypointer* b);
+
 void DeleteFileContents(string directory);
-
 void WriteToFile(block& inputData);
 void ReadToFile(block& inputData);
+
+void WriteToFile(char arrInputData[], const unsigned inputBufferSize, string directory);
+void AsyncReadToFile(ifstream& fin, arraypointer arr[], int& offsetRead);
+
 
 int main(int argc, char* argv[])
 {
@@ -37,99 +46,126 @@ int main(int argc, char* argv[])
 		{
 			if (argv[i + 1] != NULL && argv[i + 2] != NULL)
 			{
-				const int N = 32;
-				const int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
-				char arrBuffer[N / 8];
+				const unsigned N = 32;
+				int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
+
+				char arrReadBuffer[BufferSize];
+				char arrProcessingBuffer[BufferSize];
+				arraypointer arrBuffer[2]{ &arrReadBuffer ,&arrProcessingBuffer };
 
 				/* Шифрование */
-				block b{};
 				ifstream finE;
 				finE.open(argv[i + 1], ios_base::binary);
 
 				if (!finE.is_open())
-				{
 					exit(EXIT_FAILURE);
-				}
 
-				DeleteFileContents(argv[i + 2]);
+				finE.read(**arrBuffer, BufferSize);
 
-				do
+				if ((int)finE.gcount())
 				{
-					finE.read(arrBuffer, (N / 8));
+					int offset = (int)finE.gcount();
+					thread threadARF(AsyncReadToFile, ref(finE), arrBuffer, ref(offset));
 
-					if ((int)finE.gcount())
+					DeleteFileContents(argv[i + 2]);
+					block b{};
+
+					while (true)
 					{
-						for (int i = (int)finE.gcount(); i < (N / 8); i++)
+						if (offset)
 						{
-							arrBuffer[i] = NULL;
+							SwapAddress(arrBuffer, arrBuffer + 1);
+							unsigned arraySize = offset;
+							offset = 0;
+
+							b.wholeBlock += arraySize / (N / 8);
+							b.incompleteBlock += arraySize % (N / 8);
+
+							while (arraySize % (N / 8) != 0 && arraySize < BufferSize)
+							{
+								*(**(arrBuffer + 1) + arraySize) = ' ';
+								arraySize++;
+							}
+
+							TextEncryption(**(arrBuffer + 1), (**(arrBuffer + 1) + arraySize - 1), arrKey, (N / 8));
+							WriteToFile(**(arrBuffer + 1), arraySize, argv[i + 2]);
+
+							if (finE.eof())
+								break;
 						}
-
-						TextEncryption(arrBuffer, (N / 8), arrKey, GetTheNumber(arrBuffer, (N / 8)));
-						WriteToFile(arrBuffer, (N / 8), argv[i + 2]);
-
-						((int)finE.gcount() < (N / 8)) ? b.incompleteBlock = (int)finE.gcount() : b.wholeBlock++;
 					}
 
-				} while (!finE.eof());
-
-				finE.close();
-				WriteToFile(b);
+					threadARF.join();
+					WriteToFile(b);
+					finE.close();
+				}
 			}
 			else
 			{
 				cout << "\n-e [диск1:][путь1]имя_файла1 [диск2:][путь2]имя_файла2\n";
-			}			
+			}
 		}
 		else if (!strcmp(argv[i], "-d"))
 		{
 			if (argv[i + 1] != NULL && argv[i + 2] != NULL)
 			{
-				const int N = 32;
-				const int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
-				char arrBuffer[N / 8];
+				const unsigned N = 32;
+				int arrKey[N] = { 6, 29, 17, 3, 26, 13, 7, 0, 8, 15, 12, 19, 21, 5, 28, 16, 23, 24, 1, 2, 25, 30, 31, 10, 9, 14, 27, 18, 22, 4, 11, 20 };
+
+				char arrReadBuffer[BufferSize];
+				char arrProcessingBuffer[BufferSize];
+				arraypointer arrBuffer[2]{ &arrReadBuffer ,&arrProcessingBuffer };
 
 				/* Расшифровывание */
 				ifstream finD;
 				finD.open(argv[i + 1], ios_base::binary);
 
 				if (!finD.is_open())
-				{
 					exit(EXIT_FAILURE);
-				}
 
-				DeleteFileContents(argv[i + 2]);
-				block b{};
-				ReadToFile(b);
+				finD.read(**arrBuffer, BufferSize);
 
-				do
+				if ((int)finD.gcount())
 				{
-					finD.read(arrBuffer, (N / 8));
+					int offset = (int)finD.gcount();
+					thread threadARF(AsyncReadToFile, ref(finD), arrBuffer, ref(offset));
 
-					if (b.wholeBlock--)
+					DeleteFileContents(argv[i + 2]);
+					block b{};
+					ReadToFile(b);
+					long long fileSize = b.wholeBlock * (N / 8) + b.incompleteBlock;
+
+					while (true)
 					{
-						TextDecryption(arrBuffer, (N / 8), arrKey, N, GetTheNumber(arrBuffer, (N / 8)));
-						WriteToFile(arrBuffer, (N / 8), argv[i + 2]);
-
-						if (!b.wholeBlock && b.incompleteBlock)
+						if (offset)
 						{
-							finD.read(arrBuffer, (N / 8));
-							TextDecryption(arrBuffer, (N / 8), arrKey, N, GetTheNumber(arrBuffer, (N / 8)));
+							SwapAddress(arrBuffer, arrBuffer + 1);
+							unsigned arraySize = offset;
+							fileSize -= offset;
+							offset = 0;
 
-							char* arrDecryption = new char[b.incompleteBlock];
-
-							for (int i = 0; i < b.incompleteBlock; i++)
+							while (arraySize % (N / 8) != 0 && arraySize < BufferSize)
 							{
-								*(arrDecryption + i) = arrBuffer[i];
+								*(**(arrBuffer + 1) + arraySize) = ' ';
+								arraySize++;
 							}
 
-							WriteToFile(arrDecryption, b.incompleteBlock, argv[i + 2]);
-							break;
+							TextDecryption(**(arrBuffer + 1), (**(arrBuffer + 1) + arraySize - 1), arrKey, N);
+
+							if (fileSize < 0LL)
+								arraySize += (int)fileSize;
+
+							WriteToFile(**(arrBuffer + 1), arraySize, argv[i + 2]);
+
+							if (finD.eof() || fileSize < 0LL)
+								break;
 						}
 					}
 
-				} while (!finD.eof());
-
-				finD.close();
+					threadARF.detach();
+					WriteToFile(b);
+					finD.close();
+				}
 			}
 			else
 			{
@@ -141,74 +177,92 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-/* Получить целое число */
-int GetTheNumber(char inputData[], const int SIZE)
+/* Шифрование */
+void TextEncryption(char* arrBegin, char* arrEnd, int arrKey[], const unsigned keyLength)
 {
-	int number = 0;
+	// keyLength = 4
 
-	for (int i = 0; i < (SIZE - 1); i++)
+	const unsigned offsetSize = arrEnd - arrBegin + 1;
+
+	for (; arrBegin < arrEnd; arrBegin += keyLength)
 	{
-		number += (int)(unsigned char)inputData[i];
+		unsigned number = GetNumber(arrBegin, arrBegin + keyLength);
+
+		for (size_t i = 0; i < keyLength; i++)
+		{
+			*(arrBegin + i) = 0;
+
+			for (size_t j = 0; j < 7; j++)
+			{
+				*(arrBegin + i) += (int)(bool)((1 << arrKey[8 * i + j]) & number);
+				*(arrBegin + i) <<= 1;
+			}
+
+			*(arrBegin + i) += (int)(bool)((1 << arrKey[8 * i + 7]) & number);
+		}
+	}
+
+	arrBegin -= offsetSize;
+}
+/* Расшифровывание */
+void TextDecryption(char* arrBegin, char* arrEnd, int arrKey[], const unsigned keyLength)
+{
+	// keyLength = 32
+	// (keyLength / 8) = 4
+
+	const unsigned offsetSize = arrEnd - arrBegin + 1;
+
+	for (; arrBegin < arrEnd; arrBegin += (keyLength / 8))
+	{
+		unsigned number = GetNumber(arrBegin, arrBegin + (keyLength / 8));
+
+		for (size_t index, i = 0; i < (keyLength / 8); i++)
+		{
+			*(arrBegin + i) = 0;
+
+			for (size_t j = 0; j < 7; j++)
+			{
+				index = 0;
+				for (; arrKey[index] != ((keyLength - 1) - (8 * i + j)); index++);
+
+				*(arrBegin + i) += (int)(bool)((1 << (keyLength - 1 - index)) & number);
+				*(arrBegin + i) <<= 1;
+			}
+
+			index = 0;
+			for (; arrKey[index] != ((keyLength - 1) - (8 * i + 7)); index++);
+
+			*(arrBegin + i) += (int)(bool)((1 << (keyLength - 1 - index)) & number);
+		}
+	}
+
+	arrBegin -= offsetSize;
+}
+
+/* Получить целое число */
+unsigned GetNumber(char* arrBegin, char* arrEnd)
+{
+	unsigned number = 0;
+
+	for (; arrBegin < (arrEnd - 1); arrBegin++)
+	{
+		number += (unsigned)(unsigned char)*arrBegin;
 		number <<= 8;
 	}
 
-	number += (int)(unsigned char)inputData[SIZE - 1];
+	number += (unsigned)(unsigned char)*arrBegin;
+	arrBegin -= 3;
 
 	return number;
 }
-/* Шифрование + запись в буфер */
-void TextEncryption(char inputBuffer[], const int SIZE, const int arrKey[], int number)
+/* Поменять адреса местами */
+void SwapAddress(arraypointer* a, arraypointer* b)
 {
-	for (int i = 0; i < SIZE; i++)
-	{
-		inputBuffer[i] = 0;
-
-		for (int j = 0; j < 7; j++)
-		{
-			inputBuffer[i] += (int)(bool)((1 << arrKey[8 * i + j]) & number);
-			inputBuffer[i] <<= 1;
-		}
-
-		inputBuffer[i] += (int)(bool)((1 << arrKey[8 * i + 7]) & number);
-	}
-}
-/* Расшифрование + запись в буфер */
-void TextDecryption(char inputBuffer[], const int sizeBuffer, const int arrKey[], const int sizeKey, int number)
-{
-	for (int index, i = 0; i < sizeBuffer; i++)
-	{
-		inputBuffer[i] = 0;
-
-		for (int j = 0; j < 7; j++)
-		{
-			index = 0;
-
-			for (; arrKey[index] != ((sizeKey - 1) - (8 * i + j)); index++);
-
-			inputBuffer[i] += (int)(bool)((1 << (sizeKey - 1 - index)) & number);
-			inputBuffer[i] <<= 1;
-		}
-
-		index = 0;
-		for (; arrKey[index] != ((sizeKey - 1) - (8 * i + 7)); index++);
-		inputBuffer[i] += (int)(bool)((1 << (sizeKey - 1 - index)) & number);
-	}
+	arraypointer temp = *a;
+	*a = *b;
+	*b = temp;
 }
 
-/* Запись в файл */
-void WriteToFile(const char inputData[], const int SIZE, string directory)
-{
-	ofstream fout;
-	fout.open(directory, ios_base::binary | ios_base::app);
-
-	if (!fout.is_open())
-	{
-		exit(EXIT_FAILURE);
-	}
-
-	fout.write(inputData, SIZE);
-	fout.close();
-}
 /* Удалить содержимое файла */
 void DeleteFileContents(string directory)
 {
@@ -222,7 +276,6 @@ void DeleteFileContents(string directory)
 
 	fout.close();
 }
-
 /* Запись блока в файл */
 void WriteToFile(block& inputData)
 {
@@ -250,4 +303,34 @@ void ReadToFile(block& inputData)
 
 	fin >> inputData.wholeBlock >> inputData.incompleteBlock;
 	fin.close();
+}
+
+/* Записать в файл */
+void WriteToFile(char arrInputData[], const unsigned inputBufferSize, string directory)
+{
+	ofstream fout;
+	fout.open(directory, ios_base::binary | ios_base::app);
+
+	if (!fout.is_open())
+	{
+		exit(EXIT_FAILURE);
+	}
+
+	fout.write(arrInputData, inputBufferSize);
+	fout.close();
+}
+/* Асинхронное чтение из файл */
+void AsyncReadToFile(ifstream& fin, arraypointer arr[], int& offsetRead)
+{
+	do
+	{
+		if (!offsetRead)
+		{
+			fin.read(**arr, BufferSize);
+			offsetRead = (int)fin.gcount();
+		}
+
+		this_thread::sleep_for(chrono::milliseconds(20));
+
+	} while (!fin.eof());
 }
